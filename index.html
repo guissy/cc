@@ -171,16 +171,16 @@
             requestAnimationFrame(function(){
 
                 var str = "";
-                if(frameCount%35<=5) str = "";
-                else if(frameCount%35<=10) str = "·  ";
-                else if(frameCount%35<=15) str = "·· ";
-                else if(frameCount%35<=20) str = "···";
-                else if(frameCount%35<=25) str = "····";
-                else if(frameCount%35<=30) str = "·····";
+                if(frameCount%35<=5) str = "      ";
+                else if(frameCount%35<=10) str = "·     ";
+                else if(frameCount%35<=15) str = "··    ";
+                else if(frameCount%35<=20) str = "···   ";
+                else if(frameCount%35<=25) str = "····  ";
+                else if(frameCount%35<=30) str = "····· ";
                 else if(frameCount%35<=35) str = "······";
                 document.querySelector("#title").innerHTML="<span style='width: 80px'>加载正确答案中,请稍候"+str+"</span>";
                 frameCount++;
-                if (frameCount<80) {
+                if (frameCount<50) {
                     requestAnimationFrame(arguments.callee);
                 } else {
                     curNode = null;
