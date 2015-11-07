@@ -14,7 +14,7 @@
         <div class="modal-data" id="modal-data">
             <button id="x" onclick="cancel()">x</button>
             <p id="title">确定吗?</p>
-            <p>
+            <p class="btn-group">
                 <button id="yes" onclick="yes()">是的</button>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button id="no" onclick="no()">不是</button>
@@ -91,8 +91,8 @@
             var arr = node.split("->");
             arr.forEach(function(flow, index){
                 var key1 = flow.split("(").shift().trim();
-                var isYes = flow.split("(").pop().trim().indexOf("yes")!=-1;
-                var isNo = flow.split("(").pop().trim().indexOf("no")!=-1;
+                var isYes = flow.split("(").pop().indexOf("yes")!=-1;
+                var isNo = flow.split("(").pop().indexOf("no")!=-1;
                 if (index + 1 < arr.length ) {
                     for (var key2 in nodeMap) {
                         if (key1==key2) {
@@ -148,84 +148,58 @@
     }
 
     function yes() {
-        var nextNode = nodeMap[curNode.yes];
-        updateNode(nextNode);
         curState = "yes";
+        next();
     }
     function no() {
-        var nextNode = nodeMap[curNode.no];
-        updateNode(nextNode);
         curState = "no";
+        next();
     }
     function next() {
+        var nextNode = null;
         if (curNode.type=="condition" && curState=="yes") {
-            yes();
+            nextNode = nodeMap[curNode.yes];
         } else if (curNode.type=="condition" && curState=="no") {
-            no();
+            nextNode = nodeMap[curNode.no];
+        } else if (curNode.type=="condition" && curState=="") {
+            nextNode = curNode;
         } else {
-            var nextNode = nodeMap[curNode.next];
-            updateNode(nextNode);
+            nextNode = nodeMap[curNode.next];
             curState = "";
         }
+        updateNode(nextNode);
     }
     function updateNode(nextNode){
         if(nextNode.type=="end") {
             frameCount = 0;
-            requestAnimationFrame(function(){
-
-                var str = "";
-                if(frameCount%35<=5) str = "      ";
-                else if(frameCount%35<=10) str = "·     ";
-                else if(frameCount%35<=15) str = "··    ";
-                else if(frameCount%35<=20) str = "···   ";
-                else if(frameCount%35<=25) str = "····  ";
-                else if(frameCount%35<=30) str = "····· ";
-                else if(frameCount%35<=35) str = "······";
-                document.querySelector("#title").style.textAlign = "left";
-                document.querySelector("#title").innerHTML="<span style='width: 80px'>加载正确答案中,请稍候"+str+"</span>";
-                frameCount++;
-                if (frameCount<50) {
-                    requestAnimationFrame(arguments.callee);
-                } else {
-                    curNode = null;
-                    document.querySelector('button').style.backgroundColor="#FEF2A6";
-                    document.querySelector('button').style.color="#FF0000";
-                    document.querySelector('button').style.opacity=0;
-                    p.resolve(nextNode.word);
-                }
+            new Promise(function(resolve){
+                typing.dooot(resolve);
+            }).then(function(){
+                curNode = null;
+                document.querySelector('button').style.backgroundColor="#FEF2A6";
+                document.querySelector('button').style.color="#FF0000";
+                document.querySelector('button').style.opacity=0;
+                p.resolve(nextNode.word);
             });
-            document.querySelector('#yes').style.display = 'none';
-            document.querySelector('#no').style.display = 'none';
-            document.querySelector('#next').style.display = 'none';
-
+            document.querySelector('#modal-overlay .btn-group').style.display = 'none';
             curNode = nextNode;
         } else {
             document.querySelector("#title").innerText="";//nextNode.word;
             typing.start(nextNode.word);
-            if(nextNode.type=="condition") {
-                document.querySelector('#yes').style.display = 'inline';
-                document.querySelector('#no').style.display = 'inline';
-                document.querySelector('#next').style.display = 'none';
-            } else {
-                document.querySelector('#yes').style.display = 'none';
-                document.querySelector('#no').style.display = 'none';
-                document.querySelector('#next').style.display = 'inline';
-            }
-            if(nextNode.yesWord) {
-                document.querySelector('#yes').innerText=nextNode.yesWord;
-            } else {
-                document.querySelector('#yes').innerText="Yes";
-            }
-            if(nextNode.noWord) {
-                document.querySelector('#no').innerText=nextNode.noWord;
-            } else {
-                document.querySelector('#no').innerText="No";
-            }
+            document.querySelector('#modal-overlay .btn-group').style.display = 'block';
+
+            document.querySelector('#next').style.display = nextNode.type=="condition" ? 'none' : '';
+            document.querySelector('#yes').style.display = nextNode.type=="condition" ? '' : 'none';
+            document.querySelector('#no').style.display = nextNode.type=="condition" ? '' : 'none';
+
+            document.querySelector('#yes').innerText=nextNode.yesWord || "yes";
+            document.querySelector('#no').innerText=nextNode.noWord || "No";
             curNode = nextNode;
         }
 
     }
 
+    //改变页面大按钮的文字
     function changeBtn(str){
         document.querySelector('button').style.opacity=1;
         document.querySelector('button').innerText=str;
@@ -237,57 +211,46 @@
         });
     }
     function cancel(){
-        p.reject("你还没有回答完整, 继续...");
+        Promise.reject("你还没有回答完整, 继续...").catch(changeBtn);
+//        p.reject("你还没有回答完整, 继续...");
     }
     function Typing(opts) {
         this.output = opts.output;
-        this.delay = opts.delay || 120;
-        this.chain = {
-            parent: null,
-            dom: this.output,
-            val: opts.words.split("")
-        }
     }
 
-    Typing.fn = Typing.prototype = {
-        print: function(dom, val, callback) {
-            this.timer = setTimeout(function() {
-                dom.innerText=dom.innerText.replace("!!!","");
-                dom.appendChild(document.createTextNode(val));
-                callback();
-            }, this.delay);
-        },
-        play: function(ele) {
-            if (!ele) return;
-            if (!ele.val.length && ele.parent) this.play(ele.parent);
-            if (!ele.val.length) return;
-
-            var curr = ele.val.shift();
+    Typing.prototype = {
+        start: function(words) {
+            if (words) this.word = words.split("");
             var that = this;
-            this.print(ele.dom, curr, function() {
-                if (ele.val.length) {
-                    that.play(ele);
-                } else if (ele.parent) {
-                    that.play(ele.parent);
+            that.count = 0;
+            requestAnimationFrame(function(){
+                var text = that.output.innerText;
+                if (that.count%5==0) {
+                    that.output.innerText = text + that.word.shift();
                 }
+                if (that.word.length>0) {
+                    requestAnimationFrame(arguments.callee);
+                }
+                that.count++;
             });
         },
-        start: function(words) {
-            this.clear();
-            if (words) this.chain.val = words.split("");
-            if (this.timer) clearTimeout(this.timer);
-            this.chain.dom.innerText = "!!!";
-            this.play(this.chain);
-        },
-        clear: function(){
-            if (this.timer) clearTimeout(this.timer);
+        dooot: function(callback){
+            this.output.style.textAlign = "left";
+            this.count = 0;
+            var that = this;
+            requestAnimationFrame(function(){
+                var str = new Array(that.count/3+1>>0).join(". ");
+                that.output.innerText="请稍候 "+str;
+                if (that.count<50) {
+                    requestAnimationFrame(arguments.callee);
+                } else {
+                    callback()
+                }
+                that.count++;
+            });
         }
-    }
-    var typing = new Typing({
-        output: document.querySelector("#title"),
-        words: "",
-        delay: 80
-    });
+    };
+    var typing = new Typing({ output: document.querySelector("#title")});
 
 </script>
 </body>
