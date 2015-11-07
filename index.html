@@ -186,6 +186,7 @@
                     curNode = null;
                     document.querySelector('button').style.backgroundColor="#FEF2A6";
                     document.querySelector('button').style.color="#FF0000";
+                    document.querySelector('button').style.opacity=0;
                     p.resolve(nextNode.word);
                 }
             });
@@ -227,14 +228,13 @@
     }
 
     function changeBtn(str){
-        document.querySelector('button').style.opacity=0;
+        document.querySelector('button').style.opacity=1;
         document.querySelector('button').innerText=str;
         e1.style.opacity=0;
         e1.addEventListener("webkitTransitionEnd",function(){
             document.querySelector('button').removeAttribute('disabled');
             if(e1.style.opacity==0)
                 e1.style.display='none';
-            document.querySelector('button').style.opacity=1;
         });
     }
     function cancel(){
