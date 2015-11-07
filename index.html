@@ -182,8 +182,12 @@
                 frameCount++;
                 if (frameCount<80) {
                     requestAnimationFrame(arguments.callee);
-                    curNode = null;
                 } else {
+                    curNode = null;
+                    document.querySelector('button').style.backgroundColor="#FEF2A6";
+                    document.querySelector('button').style.color="#FF0000";
+                    document.querySelector('button').style.opacity=0;
+                    requestAnimationFrame(function(){document.querySelector('button').style.opacity=1;});
                     p.resolve(nextNode.word);
                 }
             });
