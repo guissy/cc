@@ -39,14 +39,6 @@ button{
     top: 0px;
     right:0px;
 }
-img{
-    display:none;
-    position: absolute;
-    top:1%;
-    opacity:1;
-    right:1px;
-
-}
 
 #title {
     background: #FEF2A6;
