@@ -125,6 +125,7 @@
     e1.style.transition='all 1s';
     var curNode = null,curState = ""; //yes or no
     function openModal(){
+        document.querySelector("#title").style.textAlign = "center";
         document.querySelector('button').setAttribute("disabled", "disabled");
         e1.style.display='block';
         e1.style.opacity=0;
@@ -178,6 +179,7 @@
                 else if(frameCount%35<=25) str = "····  ";
                 else if(frameCount%35<=30) str = "····· ";
                 else if(frameCount%35<=35) str = "······";
+                document.querySelector("#title").style.textAlign = "left";
                 document.querySelector("#title").innerHTML="<span style='width: 80px'>加载正确答案中,请稍候"+str+"</span>";
                 frameCount++;
                 if (frameCount<50) {
