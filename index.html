@@ -119,11 +119,7 @@
 
     var p;//Promise
     var frameCount;//animate frame
-    var typing = new Typing({
-        output: document.querySelector("#title"),
-        words: "",
-        delay: 80
-    });
+
     document.querySelector('button').style.fontSize="18px";
     document.querySelector('button').style.transition="all 1s ease 0.1s";
     var e1 = document.getElementById('modal-overlay');
@@ -286,6 +282,11 @@
             if (this.timer) clearTimeout(this.timer);
         }
     }
+    var typing = new Typing({
+        output: document.querySelector("#title"),
+        words: "",
+        delay: 80
+    });
 
 </script>
 </body>
