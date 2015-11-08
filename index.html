@@ -9,11 +9,12 @@
 </head>
 <body>
 <div id="container">
-    <button onclick="openModal()" class="center">该不该辞职呢?</button>
-    <div id="modal-overlay" style="display:none" >
+    <button id="question-btn" onclick="openModal()" class="center">该不该辞职呢?</button>
+    <div id="modal-overlay" style="display:none">
         <div class="modal-data" id="modal-data">
             <button id="x" onclick="cancel()">x</button>
             <p id="title">确定吗?</p>
+
             <p class="btn-group">
                 <button id="yes" onclick="yes()">是的</button>
                 <span>&nbsp;&nbsp;&nbsp;</span>
@@ -23,9 +24,9 @@
         </div>
     </div>
     <div style="display: block;position: fixed;right: 20px;bottom: 30px;">
-    <a href="should_i_quit_flow.jpeg" target="_blank">
-        <img src="should_i_quit_flow.jpeg" width="28" height="50">
-    </a></div>
+        <a href="should_i_quit_flow.jpeg" target="_blank">
+            <img src="should_i_quit_flow.jpeg" width="28" height="50">
+        </a></div>
 </div>
 <script>
     var flow = "st=>start: 该不该辞职呢？\n" +
@@ -71,9 +72,9 @@
             "continueQuit(yes)->wouldRegret\n" +
             "continueQuit(no)->later\n";
     var flowNodes = flow.split("\n");
-    var nodeMap = [],flowMap = [];
-    flowNodes.forEach(function(node){
-        if (node.indexOf("=>")!=-1) {
+    var nodeMap = [], flowMap = [];
+    flowNodes.forEach(function (node) {
+        if (node.indexOf("=>") != -1) {
             //说明是节点定义
             var arr = node.split("=>");
             var defs = arr[1].split(":");
@@ -85,26 +86,26 @@
                 flowMap["end"] = nodeMap[arr[0].trim()];
         }
     });
-    flowNodes.forEach(function(node){
-        if (node.indexOf("->")!=-1) {
+    flowNodes.forEach(function (node) {
+        if (node.indexOf("->") != -1) {
             //说明是节点流程
             var arr = node.split("->");
-            arr.forEach(function(flow, index){
+            arr.forEach(function (flow, index) {
                 var key1 = flow.split("(").shift().trim();
-                var isYes = flow.split("(").pop().indexOf("yes")!=-1;
-                var isNo = flow.split("(").pop().indexOf("no")!=-1;
-                if (index + 1 < arr.length ) {
+                var isYes = flow.split("(").pop().indexOf("yes") != -1;
+                var isNo = flow.split("(").pop().indexOf("no") != -1;
+                if (index + 1 < arr.length) {
                     for (var key2 in nodeMap) {
-                        if (key1==key2) {
-                            if (nodeMap[key2].type=="condition" && isYes) {
+                        if (key1 == key2) {
+                            if (nodeMap[key2].type == "condition" && isYes) {
                                 nodeMap[key2].yes = arr[index + 1];
-                                if(flow.indexOf("|")>0) {
-                                    nodeMap[key2].yesWord=flow.split("|").pop().replace(")","");
+                                if (flow.indexOf("|") > 0) {
+                                    nodeMap[key2].yesWord = flow.split("|").pop().replace(")", "");
                                 }
                             } else if (nodeMap[key2].type == "condition" && isNo) {
                                 nodeMap[key2].no = arr[index + 1];
-                                if(flow.indexOf("|")>0) {
-                                    nodeMap[key2].noWord=flow.split("|").pop().replace(")","");
+                                if (flow.indexOf("|") > 0) {
+                                    nodeMap[key2].noWord = flow.split("|").pop().replace(")", "");
                                 }
                             } else {
                                 nodeMap[key2].next = arr[index + 1]
@@ -117,29 +118,29 @@
     });
 
 
-
-    var p;//Promise
-    var frameCount;//animate frame
-
-    document.querySelector('button').style.fontSize="18px";
-    document.querySelector('button').style.transition="all 1s ease 0.1s";
-    var e1 = document.getElementById('modal-overlay');
-    e1.style.transition='all 1s';
-    var curNode = null,curState = ""; //yes or no
-    function openModal(){
+    questionBtn = document.getElementById('question-btn');
+    questionBtn.style.fontSize = "18px";
+    questionBtn.style.transition = "all 1s ease 0.1s";
+    var modalElement = document.getElementById('modal-overlay');
+    modalElement.style.transition = 'all 1s';
+    var curNode = null, curState = ""; //yes or no
+    var modalPromise;//Promise
+    function openModal() {
         document.querySelector("#title").style.textAlign = "center";
-        document.querySelector('button').setAttribute("disabled", "disabled");
-        e1.style.display='block';
-        e1.style.opacity=0;
-        setTimeout(function(){
-            e1.style.opacity=1;
-        },10);
-        p=Promise.defer();
-        p.promise.then(changeBtn,changeBtn);
+        questionBtn.setAttribute("disabled", "disabled");
+        modalElement.style.display = 'block';
+        modalElement.style.opacity = 0;
+        setTimeout(function () {
+            modalElement.style.opacity = 1;
+        }, 10);
+        modalPromise = Promise.defer();
+        modalPromise.promise
+                .then(changeQuestionBtnText)//当完成交互时,关闭弹框,大按钮显示回答结果
+                .catch(changeQuestionBtnText); //当点击关闭按钮时,关闭弹框,大按钮显示"继续"字样
 
         //处理流程
         var nextNode = null;
-        if (curNode==null) {
+        if (curNode == null) {
             nextNode = flowMap["start"];
             updateNode(nextNode);
         } else {
@@ -157,11 +158,11 @@
     }
     function next() {
         var nextNode = null;
-        if (curNode.type=="condition" && curState=="yes") {
+        if (curNode.type == "condition" && curState == "yes") {
             nextNode = nodeMap[curNode.yes];
-        } else if (curNode.type=="condition" && curState=="no") {
+        } else if (curNode.type == "condition" && curState == "no") {
             nextNode = nodeMap[curNode.no];
-        } else if (curNode.type=="condition" && curState=="") {
+        } else if (curNode.type == "condition" && curState == "") {
             nextNode = curNode;
         } else {
             nextNode = nodeMap[curNode.next];
@@ -169,79 +170,80 @@
         }
         updateNode(nextNode);
     }
-    function updateNode(nextNode){
-        if(nextNode.type=="end") {
-            frameCount = 0;
-            new Promise(function(resolve){
+    function updateNode(nextNode) {
+        if (nextNode.type == "end") {
+            new Promise(function (resolve) {
                 typing.dooot(resolve);
-            }).then(function(){
-                curNode = null;
-                document.querySelector('button').style.backgroundColor="#FEF2A6";
-                document.querySelector('button').style.color="#FF0000";
-                document.querySelector('button').style.opacity=0;
-                p.resolve(nextNode.word);
-            });
+            }).then(function () {
+                        curNode = null;
+                        questionBtn.style.backgroundColor = "#FEF2A6";
+                        questionBtn.style.color = "#FF0000";
+                        questionBtn.style.opacity = 0;
+                        modalPromise.resolve(nextNode.word);
+                    });
             document.querySelector('#modal-overlay .btn-group').style.display = 'none';
             curNode = nextNode;
         } else {
-            document.querySelector("#title").innerText="";//nextNode.word;
+            document.querySelector("#title").innerText = "";//nextNode.word;
             typing.start(nextNode.word);
             document.querySelector('#modal-overlay .btn-group').style.display = 'block';
 
-            document.querySelector('#next').style.display = nextNode.type=="condition" ? 'none' : '';
-            document.querySelector('#yes').style.display = nextNode.type=="condition" ? '' : 'none';
-            document.querySelector('#no').style.display = nextNode.type=="condition" ? '' : 'none';
+            document.querySelector('#next').style.display = nextNode.type == "condition" ? 'none' : '';
+            document.querySelector('#yes').style.display = nextNode.type == "condition" ? '' : 'none';
+            document.querySelector('#no').style.display = nextNode.type == "condition" ? '' : 'none';
 
-            document.querySelector('#yes').innerText=nextNode.yesWord || "yes";
-            document.querySelector('#no').innerText=nextNode.noWord || "No";
+            document.querySelector('#yes').innerText = nextNode.yesWord || "yes";
+            document.querySelector('#no').innerText = nextNode.noWord || "No";
             curNode = nextNode;
         }
 
     }
 
     //改变页面大按钮的文字
-    function changeBtn(str){
-        document.querySelector('button').style.opacity=1;
-        document.querySelector('button').innerText=str;
-        e1.style.opacity=0;
-        e1.addEventListener("webkitTransitionEnd",function(){
-            document.querySelector('button').removeAttribute('disabled');
-            if(e1.style.opacity==0)
-                e1.style.display='none';
+    function changeQuestionBtnText(str) {
+        questionBtn.style.opacity = 1;
+        questionBtn.innerText = str;
+        modalElement.style.opacity = 0;
+        modalElement.addEventListener("webkitTransitionEnd", function () {
+            questionBtn.removeAttribute('disabled');
+            if (modalElement.style.opacity == 0)
+                modalElement.style.display = 'none';
         });
     }
-    function cancel(){
-        Promise.reject("你还没有回答完整, 继续...").catch(changeBtn);
-//        p.reject("你还没有回答完整, 继续...");
+    function cancel() {
+        Promise.reject("你还没有回答完整, 继续...").catch(changeQuestionBtnText);
+//        modalPromise.reject("你还没有回答完整, 继续...");
     }
+
+    //打字效果和加载时省略号动画效果
     function Typing(opts) {
         this.output = opts.output;
     }
 
     Typing.prototype = {
-        start: function(words) {
+        start: function (words) {
             if (words) this.word = words.split("");
             var that = this;
             that.count = 0;
-            requestAnimationFrame(function(){
+            requestAnimationFrame(function () {
                 var text = that.output.innerText;
-                if (that.count%5==0) {
+                if (that.count % 5 == 0) {
                     that.output.innerText = text + that.word.shift();
                 }
-                if (that.word.length>0) {
+                if (that.word.length > 0) {
                     requestAnimationFrame(arguments.callee);
                 }
                 that.count++;
             });
         },
-        dooot: function(callback){
+        dooot: function (callback) {
             this.output.style.textAlign = "left";
             this.count = 0;
             var that = this;
-            requestAnimationFrame(function(){
-                var str = new Array(that.count/3+1>>0).join(". ");
-                that.output.innerText="请稍候 "+str;
-                if (that.count<50) {
+            requestAnimationFrame(function () {
+                var str = new Array(that.count / 3 + 1 >> 0).join(". ");
+                that.output.innerText = "请稍候 " + str;
+                if (that.count < 50) {
                     requestAnimationFrame(arguments.callee);
                 } else {
                     callback()
@@ -250,7 +252,7 @@
             });
         }
     };
-    var typing = new Typing({ output: document.querySelector("#title")});
+    var typing = new Typing({output: document.querySelector("#title")});
 
 </script>
 </body>
