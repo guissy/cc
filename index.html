@@ -119,7 +119,7 @@
         }
     });
 
-    document.body.style.height = window.outerHeight+"px";
+    document.body.style.height = window.outerHeight + "px";
     questionBtn = document.getElementById('question-btn');
     questionBtn.style.fontSize = "18px";
     questionBtn.style.transition = "all 1s ease 0.1s";
@@ -177,13 +177,13 @@
             new Promise(function (resolve) {
                 typing.dooot(resolve);
             }).then(function () {
-                        curNode = null;
-                        questionBtn.style.backgroundColor = "#FEF2A6";
-                        questionBtn.style.color = "#FF0000";
-                        questionBtn.style.opacity = 0;
-                        modalPromise.resolve(nextNode.word);
-                        document.body.className = "result";
-                    });
+                curNode = null;
+                questionBtn.style.backgroundColor = "#FEF2A6";
+                questionBtn.style.color = "#FF0000";
+                questionBtn.style.opacity = 0;
+                modalPromise.resolve(nextNode.word);
+                document.body.className = "result";
+            });
             document.querySelector('#modal-overlay .btn-group').style.display = 'none';
             curNode = nextNode;
         } else {
