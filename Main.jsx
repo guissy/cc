@@ -1,103 +1,46 @@
 import React from 'react';
+import { createSelector } from 'reselect';
+import actions from './actions';
+import { connect } from 'react-redux';
 
-export default class Main extends React.Component {
-    construct(){
-        const flowNodes = ("st=>start: 该不该辞职呢？\n" +
-        "e=>end: 不要再想了, 辞职吧! Good Luck!\n" +
-        "hasFound=>condition: 找到新工作了吗\n" +
-        "hasMoney=>condition: 你有没足够的资金维持自己下半生的生活\n" +
-        "trueMoney=>condition: 你肯定\n" +
-        "hasGanDei=>condition: 有没人养你下半生\n" +
-        "trueGanDei=>condition: 信得过\n" +
-        "enjoyJob=>condition: 真的想做\n" +
-        "wouldRegret=>condition: 辞职了会后悔吗\n" +
-        "later=>condition: 再做几个月看看\n" +
-        "howAbout=>condition: 做得怎么样\n" +
-        "whyHere=>operation: 为何又绕到这里呢\n" +
-        "askWhyQuit=>operation: 老实说为什么要辞职\n" +
-        "whyQuit=>operation: 人工不够高；做得不开心；纯粹想走；追梦想\n" +
-        "continueQuit=>condition: 还要辞职吗\n" +
-        "talkBoss=>operation: 跟老板谈一下\n" +
-        "talkBossResult=>condition: 谈得怎么样\n" +
-        "st->hasMoney\n" +
-        "hasMoney(yes|有)->trueMoney\n" +
-        "hasMoney(no|无)->hasGanDei\n" +
-        "trueMoney(yes)->e\n" +
-        "trueMoney(no)->hasFound\n" +
-        "hasGanDei(yes)->trueGanDei\n" +
-        "hasGanDei(no)->hasFound\n" +
-        "trueGanDei(yes)->e\n" +
-        "trueGanDei(no)->hasFound\n" +
-        "hasFound(yes)->enjoyJob\n" +
-        "hasFound(no)->askWhyQuit->whyQuit\n" +
-        "enjoyJob(yes)->wouldRegret\n" +
-        "enjoyJob(no)->e\n" +
-        "wouldRegret(yes)->later\n" +
-        "wouldRegret(no)->e\n" +
-        "later(yes|好吧)->howAbout\n" +
-        "later(no|决不)->e\n" +
-        "howAbout(yes|还好)->whyHere->whyQuit\n" +
-        "howAbout(no|不好)->continueQuit\n" +
-        "whyQuit->talkBoss\n" +
-        "talkBoss->talkBossResult\n" +
-        "talkBossResult(yes|还好)->continueQuit\n" +
-        "talkBossResult(no|不要提了)->hasFound\n" +
-        "continueQuit(yes)->wouldRegret\n" +
-        "continueQuit(no)->later\n").split("\n"),
-            nodeMap = [], flowMap = [];
-        flowNodes.forEach(function (node) {
-            if (node.indexOf("=>") != -1) {
-                //说明是节点定义
-                var arr = node.split("=>");
-                var defs = arr[1].split(":");
-                var type = defs[0].trim();
-                nodeMap[arr[0].trim()] = {type: type, word: defs[1].trim()};
-                if (type == "start")
-                    flowMap["start"] = nodeMap[arr[0].trim()];
-                else if (type == "end")
-                    flowMap["end"] = nodeMap[arr[0].trim()];
-            }
+//显示问题区
+const Main = ({info,dispatch})=>(
+    <div id="container">
+        <div onClick={e=>{dispatch(actions.start());dispatch(actions.answerAll({}))}} className="mainbox-wrap">
+            <MainBox info={info}/>
+        </div>
+        <ModalBox />
+    </div>
+);
+Main.propTypes = {info: React.PropTypes.string.isRequired};
+Main.defaultProps = {info: "默认:该不该辞职呢?"};
+const MainBox = (props)=>React.DOM.button({className: "center main_box"}, props.info);
+const selector =
+        state => ({
+            info: state ? state.get('info') : '流动性比利润更重要！'
         });
-        flowNodes.forEach(function (node) {
-            if (node.indexOf("->") != -1) {
-                //说明是节点流程
-                var arr = node.split("->");
-                arr.forEach(function (flow, index) {
-                    var key1 = flow.split("(").shift().trim();
-                    var isYes = flow.split("(").pop().indexOf("yes") != -1;
-                    var isNo = flow.split("(").pop().indexOf("no") != -1;
-                    if (index + 1 < arr.length) {
-                        for (var key2 in nodeMap) {
-                            if (key1 == key2) {
-                                if (nodeMap[key2].type == "condition" && isYes) {
-                                    nodeMap[key2].yes = arr[index + 1];
-                                    if (flow.indexOf("|") > 0) {
-                                        nodeMap[key2].yesWord = flow.split("|").pop().replace(")", "");
-                                    }
-                                } else if (nodeMap[key2].type == "condition" && isNo) {
-                                    nodeMap[key2].no = arr[index + 1];
-                                    if (flow.indexOf("|") > 0) {
-                                        nodeMap[key2].noWord = flow.split("|").pop().replace(")", "");
-                                    }
-                                } else {
-                                    nodeMap[key2].next = arr[index + 1]
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+export default connect(selector)(Main)
+
+
+
+//弹出框
+const _modalBox = ({showModal,curNode,dispatch})=>(
+    <div id="modal-overlay" style={{display:!!showModal?'block':'none',opacity:!!showModal?1:0,transition:'all 1s'}}>
+        <div className="modal-data" id="modal-data">
+            <button id="x" onClick={e=>dispatch(actions.pause())} className="close">&times;</button>
+            <p id="title">{curNode.title}</p>
+            <p className="btn-group">
+                <button id="yes" onClick={e=>dispatch(actions.answerAll({curState:'yes'}))} className="yes">是的</button>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button id="no" onClick={e=>dispatch(actions.answerAll({curState:'no'}))} className="no">不是</button>
+                <button id="next" onClick={e=>dispatch(actions.answerAll({curState:'next'}))} style={{display: 'none'}} className="yes">下一步</button>
+            </p>
+        </div>
+    </div>
+);
+const selectorModal =
+        state => ({
+            showModal: state ? state.get('showModal') : false,
+            curNode: state ? state.get('curNode') || {title:""} : {title:""}
         });
-        this.state = {nodeMap, flowMap};
-    }
-
-    openModal(){
-
-    }
-
-    render(){
-        return (
-            <MainBox onClick={this.openModal}></MainBox>
-        )
-    }
-}
+const ModalBox = connect(selectorModal)(_modalBox);
