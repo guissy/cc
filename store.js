@@ -1,11 +1,9 @@
 import { createStore,applyMiddleware } from 'redux';
-import thunkMiddleware from 'redux-thunk'
-import answer from './reducerAnswer';
-import pause from './reducerPause';
-import start from './reducerStart';
-import end from './reducerEnd';
+import thunkMiddleware from 'redux-thunk';
+
 
 import Immutable from 'immutable';
+import reducers from './reducerAll';
 import flow_data from './flow_data';
 
 const nodes = flow_data.split("\n");
@@ -59,19 +57,14 @@ flowNodes.forEach(function (node) {
     }
 });
 
-const actionFnMap = {answer,start,pause,end};
 const state = Immutable.Map({nodeMap,flowMap,
     info:flowMap['start'].word,
-    showModal:false
-});
-let reducers = (state, action)=>{
-    var fn = actionFnMap[action.type];
-    if(typeof fn === 'function') {
-        return fn(state,action);
-    } else {
-        console.dir(state);
-        console.info(action.type);
-        return state;
+    showModal:false,
+    typed:false,
+    result:{
+        mainBoxStyle: {color: "#FF0000",opacity:1},
+        bodyClassName: ""
     }
-};
+});
+
 export default applyMiddleware(thunkMiddleware)(createStore)(reducers, state);
