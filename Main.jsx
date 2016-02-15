@@ -3,6 +3,7 @@ import { createSelector } from 'reselect';
 import actions from './actions';
 import { connect } from 'react-redux';
 import Typing  from './typing';
+import {Animate} from 'react-rebound';
 
 //显示问题区
 const Main = ({info,result,dispatch})=>(
