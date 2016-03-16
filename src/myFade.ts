@@ -19,6 +19,8 @@ import {EventEmitter} from 'angular2/core';
 export class MyFade {
     // @Input() end:Function;
     @Output() ended:any = new EventEmitter();
+
+    waitingResult:boolean = false;
     constructor(private _ab: AnimationBuilder, private _e: ElementRef) {
         _e.nativeElement.style.backgroundColor = "#222222";
     }
@@ -27,10 +29,10 @@ export class MyFade {
         animation.setDuration(1000);
         console.log(isVisible,'isVisible');
         if(isVisible){
-            animation.setFromStyles({opacity:0}).setToStyles({opacity:1})
+            animation.setFromStyles({opacity:0}).setToStyles({opacity:1});
             animation.start(this._e.nativeElement);
         } else {
-            animation.setFromStyles({opacity:1}).setToStyles({opacity:0})
+            animation.setFromStyles({opacity:1}).setToStyles({opacity:0});
             animation.start(this._e.nativeElement).onComplete(()=>this.ended.emit(null));
         }
     }

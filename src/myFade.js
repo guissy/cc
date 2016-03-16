@@ -22,6 +22,7 @@ var MyFade = (function () {
         this._e = _e;
         // @Input() end:Function;
         this.ended = new core_2.EventEmitter();
+        this.waitingResult = false;
         _e.nativeElement.style.backgroundColor = "#222222";
     }
     MyFade.prototype.toggle = function (isVisible) {
