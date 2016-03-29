@@ -20,7 +20,11 @@ module.exports = {
     devtool: 'source-map',
     debug: true,
     // entry: './src/index',
-    entry: { 'polyfills': './src/polyfills.ts', 'main': './src/index.ts' },
+    entry: {
+        'polyfills': './src/polyfills.ts',
+        'vendor': './src/vendor.ts',
+        'main': './src/index.ts'
+    },
     // output: {
     //     path: __dirname + "/dist",
     //     publicPath: "dist/",

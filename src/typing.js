@@ -1,4 +1,3 @@
-"use strict";
 var Typing = (function () {
     function Typing(output) {
         this.count = 0;
@@ -48,7 +47,7 @@ var Typing = (function () {
         requestAnimationFrame(animate);
     };
     return Typing;
-}());
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Typing;
 //# sourceMappingURL=typing.js.map

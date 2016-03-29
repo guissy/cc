@@ -1,4 +1,3 @@
-"use strict";
 // Polyfills
 // import 'ie-shim';
 require('es6-shim');

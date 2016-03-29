@@ -1,4 +1,3 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -163,7 +162,7 @@ var MyFlow = (function () {
         __metadata('design:paramtypes', [])
     ], MyFlow);
     return MyFlow;
-}());
+})();
 exports.MyFlow = MyFlow;
 var NodeLike = (function () {
     function NodeLike(type, word) {
@@ -171,5 +170,5 @@ var NodeLike = (function () {
         this.word = word;
     }
     return NodeLike;
-}());
+})();
 //# sourceMappingURL=myFlow.js.map

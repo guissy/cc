@@ -1,4 +1,3 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -69,7 +68,7 @@ var CcApp = (function () {
         __metadata('design:paramtypes', [])
     ], CcApp);
     return CcApp;
-}());
+})();
 exports.CcApp = CcApp;
 browser_1.bootstrap(CcApp).catch(function (err) { return console.error(err); });
 //# sourceMappingURL=index.js.map
